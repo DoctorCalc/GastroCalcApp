@@ -1,0 +1,33 @@
+workflows:
+  ios-capacitor-workflow:
+    name: Build iOS App
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      node: latest
+      xcode: latest
+      vars:
+        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+    scripts:
+      - name: Install dependencies
+        script: | 
+          npm install
+      - name: Build Web Project
+        script: | 
+          npm run build
+      - name: Capacitor Sync
+        script: | 
+          chmod +x node_modules/.bin/cap
+          # Esto añade la plataforma y genera el .xcworkspace si falta
+          npx cap add ios || true
+          npx cap sync ios
+      - name: Build iOS (.ipa)
+        script: | 
+          xcode-project build-ipa --workspace $(find ios -name "*.xcworkspace" | head -n 1) --scheme "App"
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      email:
+        recipients:
+          - TU_EMAIL_pacocasadoc@gmail.com
