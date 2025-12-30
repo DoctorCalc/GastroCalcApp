@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+    <title>Algoritmo Lesiones Precancerosas — ESGE 2025</title>
+
+    <style>
+        :root{
+            --blue:#0056a8;
+            --muted:#666;
+            --accent:#007bff;
+        }
+
+        body{
+            font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background:#f4f7f6;
+            color:#222;
+            margin:0;
+            padding:0;
+        }
+
+        /* ============ HEADER ============ */
+        .header{
+            background: var(--blue);
+            color:#fff;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:16px;
+            padding:14px 20px;
+            flex-wrap:wrap;
+        }
+
+        .header-logo{
+            height:60px;
+            width:auto;
+        }
+
+        .header-title{
+            flex:1;
+            text-align:center;
+            font-size:1.55rem;
+            font-weight:700;
+            margin:0;
+        }
+
+        /* ============ PAGE CONTAINER ============ */
+        .container{
+            max-width: 950px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 24px;
+            border-radius:12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        }
+
+        /* ============ SECTION STYLES ============ */
+        .section { margin-top:18px; border-radius:10px; padding:14px; box-shadow: 0 4px 10px rgba(0,0,0,0.12); border:1px solid rgba(0,0,0,0.15); }
+        .section-instrucciones { background:#e6e5dc; }
+        .section-displasia { background:#b1d0fa; }
+        .section-staging  { background:#8dfcbd; }
+        .section-clinical { background:#f7c6b7; }
+        .section-quality  { background:#fdfdfd; border:1px solid #e0e0e0; }
+
+        h2{ margin:0 0 8px 0; font-size:1.15rem; }
+        h3{ margin:8px 0; font-size:1rem; }
+
+        /* ============ OPTIONS (one-per-line, spacing B) ============ */
+        .option-group label{
+            display:block;
+            padding:10px 12px;
+            margin:10px 0;           /* separation B (approx 14-18px total visual) */
+            background:#fff;
+            border-radius:8px;
+            border:1px solid #ddd;
+            cursor:pointer;
+            font-size:1rem;
+            align-items:center;
+            /* ⭐ AÑADIDO PARA RELIEVE Y SOMBRA */
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+
+        /* Pequeño efecto al pasar el ratón */
+        .option-group label:hover{ background:#f6f8fb; transform: translateY(-1px); box-shadow: 0 5px 10px rgba(0,0,0,0.18);}
+        .option-group input[type="checkbox"],
+        .option-group input[type="radio"]{
+            transform: scale(1.12);
+            margin-right:12px;
+            vertical-align:middle;
+        }
+
+        /* ============ BUTTONS ============ */
+        .btn-row{ display:flex; gap:12px; margin-top:18px; }
+        .btn {
+            flex:1;
+            padding:12px;
+            border-radius:8px; 
+            font-weight:700; 
+            border:none; 
+            cursor:pointer; 
+            font-size:1rem;
+        }
+        
+        #calculate-btn {
+            background:var(--accent);
+            color:#fff;
+            border:0;
+            padding:12px 18px;
+            border-radius:12px;
+            cursor:pointer;
+            font-size:1rem;
+            font-weight:600;
+
+           /* relieve */
+            box-shadow:
+            0 4px 0 #003799,      /* borde inferior tipo botón físico */
+            0 6px 12px rgba(0,0,0,0.18); /* sombra suave exterior */
+
+            transition:transform .15s, box-shadow .15s, background .2s;
+        }
+        
+        #calculate-btn:hover {
+            background:0082e6;
+        }
+        
+        #calculate-btn:active{
+            transform:translateY(2px);     /* hundimiento */
+            box-shadow:
+            0 2px 0 #003799,
+            0 3px 6px rgba(0,0,0,0.18);
+        }
+        
+        #clear-btn {
+            background:#dcdcdc;
+            color:#222;
+            box-shadow:
+            0 4px 0 #9e9e9e,
+            0 6px 12px rgba(0,0,0,0.12);
+        }
+        
+        #clear-btn:hover {
+            background:#bec8d1;
+        }
+        
+        #clear-btn:active {     
+            transform:translateY(2px);
+            box-shadow:
+            0 2px 0 #9e9e9e,
+            0 3px 6px rgba(0,0,0,0.12);
+        }
+        
+        .btn:hover {
+            filter: brightness(0.92);
+        }
+        
+        .btn:active {
+            filter: brightness(0.80);
+        }
+
+        .menu-btn{
+            display:inline-block;
+            cursor: pointer;
+            margin-top:12px;
+            text-decoration:none;
+            background:#e7e7e7;
+            color:#222;
+            padding:10px 14px;
+            border-radius:8px;
+            font-weight:600;
+            font-size:0.95rem;
+            box-shadow:
+            0 4px 0 #9e9e9e,
+            0 6px 12px rgba(0,0,0,0.12);
+       }
+       .menu-btn:hover{
+           background:#d5d5d5;
+       }
+       
+       .menu-btn:active {
+            transform:translateY(2px);
+            box-shadow:
+            0 2px 0 #9e9e9e,
+            0 3px 6px rgba(0,0,0,0.12);
+        }
+       
+       .menu-bar {
+            display:flex;
+            justify-content:space-between;
+            margin-top:14px;
+       }
+
+       
+        /* ============ RESULT ============ */
+        #result{
+            margin-top:22px;
+            padding:16px;
+            border-radius:10px;
+            background:#eef7ff;
+            border:1px solid #cfe5ff;
+        }
+        .risk-pill{
+            display:inline-block;
+            padding:6px 12px;
+            border-radius:999px;
+            font-weight:700;
+            color:white;
+            margin-left:10px;
+        }
+        .pill-low{ background:#2ca02c; }
+        .pill-moderate{ background:#e07b00; }
+        .pill-high{ background:#c60000; }
+
+        /* ============ INFO HELP ICON ============ */
+        .info-help{ float:right; font-size:1.3rem; font-weight:700; cursor:pointer; color:#444; }
+
+        /* ============ MODAL ============ */
+        .modal-overlay{
+            position:fixed; inset:0; background: rgba(0,0,0,0.55);
+            display:none; justify-content:center; align-items:center; z-index:5000;
+        }
+        .modal-box{
+            background:#fff; max-width:560px; width:90%; padding:20px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.25);
+        }
+        
+        .close-modal{ float:right; cursor:pointer; font-weight:700; font-size:1.1rem; color:#555; }
+
+        /* ============ NOTE FOOTER ============ */
+        .note-footer{
+            margin-top:36px;
+            text-align:center;
+            font-size:0.92rem;
+            color:var(--muted);
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width:700px){
+            .header{
+                justify-content:space-between;
+                text-align:center;
+            }
+
+            .left-logo{
+                order:1;
+            }
+
+            .right-logo{
+                order:1;
+            }
+
+            .header-logo{
+                height:52px;
+            }
+
+            .header-title{
+                width:100%;
+                order:2;
+                margin-top:8px;
+                font-size:1.25rem;
+            }
+
+            .btn-row{ flex-direction:column; }
+            .option-group label{ padding:12px; margin:8px 0; }
+            .container{ padding:16px; margin:12px; }
+        }
+         
+        .img-modal {
+            display:none;
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,0.9);
+            z-index:10000;
+            overflow:auto;
+            padding:30px;
+        }       
+        /* Estilos para el visor de imagen */
+        /* Contenedor negro de fondo */
+        .modal-viewer {
+            display: none;
+            position: fixed;
+            z-index: 99999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            overflow: auto; 
+        }
+
+        /* Envoltorio que permite el centrado */
+        .modal-content-wrapper {
+            display: flex;
+            min-width: 100%;
+            min-height: 100%;
+        }
+
+        .modal-viewer img {
+            margin: auto; 
+            max-width: 95%;
+            max-height: 90vh;
+            transition: width 0.3s ease;
+            cursor: zoom-in;
+            flex-shrink: 0;
+            object-fit: contain; /* Mantiene la proporción siempre */
+        }
+
+        /* ESTADO AMPLIADO: Corrección para imágenes horizontales */
+        .modal-viewer img.zoomed {
+            display: block !important; /* Sale del modo flex para evitar deformaciones */
+            max-width: none !important;
+            max-height: none !important;
+    
+            /* Forzamos el tamaño al 250% del ancho de la pantalla */
+            width: 250vw !important; 
+            height: auto !important; /* La altura se calcula sola según el ancho */
+    
+            /* Aseguramos que no haya otras reglas interfiriendo */
+            flex: none !important;
+            aspect-ratio: auto !important;
+    
+            cursor: zoom-out;
+            margin: 100px auto !important; /* El margen auto arriba/abajo ayuda al scroll */
+        }
+
+        .close-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 45px;
+            background: rgba(0,0,0,0.5);
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            z-index: 100000;
+        }
+
+        #about-modal video{
+            width: 85%;
+            max-width: 280px;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto 12px auto;
+            
+        }
+        #about-modal .modal-box {
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+        .about-text {
+            text-align: justify;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- ============ HEADER ============ -->
+    <div class="header">
+        <img src="LogoDoctorCalc.jpg" alt="Logo DoctorCalc" class="header-logo left">
+        <h1 class="header-title">Algoritmo de Seguimiento de Lesiones Precancerosas Gástricas<br>(Basado en las recomendaciones de la ESGE 2025)</h1>
+        <img src="logodige.jpg" alt="Logo DIGE" class="header-logo right">
+    </div>
+
+    <!-- ============ FORM (wrap all interactive controls) ============ -->
+    <form id="algo-form" onsubmit="return false;">
+        <div class="container">
+
+            <!-- ============ QUALITY / BIOPSY PROTOCOL ============ -->
+            <details class="info-box">
+                <summary style="font-weight:700; cursor:pointer; padding:6px 8px; font-size:1.5rem;">Requisitos de Calidad Endoscópica y Protocolo de Biopsias</summary>
+                <div style="padding:10px 8px 6px 8px; font-size:0.95rem; color:#222;">
+                    <h3>Requisitos de calidad de la gastroscopia</h3>
+                    <ul>
+                        <li>Duración de la inspección ≥ <strong>7 minutos</strong>.</li>
+                        <li>Toma de <strong>≥ 10 fotografías</strong>.</li>
+                        <li>Uso de <strong>cromoendoscopia virtual</strong> (NBI / i-scan / BLI).</li>
+                        <li>Realizada por <strong>personal entrenado</strong>.</li>
+                    </ul>
+
+                    <h3>Protocolo de biopsias (estadiaje)</h3>
+                    <p><strong>Si no hay lesiones visibles:</strong></p>
+                    <ul>
+                        <li>Toma de biopsias aleatorias: <strong>2 de antro</strong> y <strong>2 de cuerpo</strong>. La incisura es opcional*</li>
+                    </ul>
+                    <p><strong>Si existe lesión sospechosa:</strong></p>
+                    <ul>
+                        <li>Describir localización, tamaño y clasificación (París).</li>
+                        <li>Evaluar patrón mucoso/vascular con cromoendoscopia.</li>
+                        <li>Realizar fotografías detalladas.</li>
+                        <li>Tomar <strong>≥2 biopsias dirigidas</strong> de la lesión.</li>
+                    </ul>
+
+                    <p style="margin-top:8px; color:var(--muted); font-size:0.9rem;">
+                        * En casos individuales o si no se dispone de cromoendoscopia virtual y se está utilizando la clasificación histopatológica OLGA y OLGIM.
+                    </p>
+                </div>
+            </details>
+
+
+            <section class="section section-instrucciones" aria-labelledby="instrucciones-title">
+            
+            <div style="color:#222;">
+                <h3 id="instrucciones-title">Marque las casillas que correspondan a los hallazgos de la biopsia y factores clínicos, teniendo en cuenta que la displasia manda sobre todos ellos. Si quiere ver los criterios de calidad de la endoscopia, pulse sobre el título de arriba.</h3>
+            </div>    
+            </section>
+                
+            <!-- ============ 1) DISPLASIA ============ -->
+            <section class="section section-displasia" aria-labelledby="displasia-title">
+                <h2 id="displasia-title">1. Displasia</h2>
+
+                <div class="option-group" role="radiogroup" aria-label="Displasia">
+                    <label><input type="radio" name="dysplasia" value="none" checked> Sin displasia</label>
+                    <label><input type="radio" name="dysplasia" value="indefinite"> Displasia indefinida</label>
+                    <label><input type="radio" name="dysplasia" value="lgd"> Displasia de bajo grado (LGD)</label>
+                    <label><input type="radio" name="dysplasia" value="hgd"> Displasia de alto grado (HGD)</label>
+                </div>
+            </section>
+
+            <!-- ============ 2) ESTADIAJE HISTOLÓGICO ============ -->
+            <section id="staging-group" class="section section-staging" aria-labelledby="staging-title">
+                <h2 id="staging-title">2. Estadiaje Histológico
+                    <span id="open-histo-help" 
+                          style="float:right; cursor:pointer; font-size:1.2rem; font-weight:700; 
+                                 background:#fff; border-radius:50%; width:26px; height:26px; 
+                                 display:flex; align-items:center; justify-content:center; 
+                                 border:1px solid #333;">
+                         ?
+                    </span>
+                </h2>
+                <div class="option-group">
+                    <label><input type="checkbox" class="stage" id="im-extensa"> Metaplasia intestinal extensa</label>
+                    <label><input type="checkbox" class="stage" id="im-incompleta"> Metaplasia intestinal incompleta</label>
+                    <label><input type="checkbox" class="stage" id="olga-olgim-3-4"> OLGA/OLGIM III–IV (Implica gastritis atrófica/metaplasia avanzada)</label>
+                    <label><input type="checkbox" class="stage" id="c3-eggim"> C3+ / EGGIM ≥5 (Implica gastritis atrófica/metaplasia extensa)</label>
+
+                    <label><input type="checkbox" class="stage" id="olgim-1-2"> OLGIM I–II</label>
+                    <label><input type="checkbox" class="stage" id="olga-olgim-0-2"> OLGA/OLGIM 0–II</label>
+
+                    <label><input type="checkbox" class="stage" id="ga-antral"> Gastritis atrófica leve/moderada restringida al antro</label>
+                    <label><input type="checkbox" class="stage" id="gastritis-auto"> Gastritis autoinmune</label>
+
+                    <label><input type="checkbox" id="biopsia-normal"> Biopsia normal</label>
+                </div>
+            </section>
+
+            <!-- ============ 3) FACTORES CLÍNICOS ============ -->
+            <section id="risk-factors-group" class="section section-clinical" aria-labelledby="factors-title">
+                <h2 id="factors-title">
+                    3. Factores Clínicos
+                    <span id="open-help"
+                          title="Información sobre cribado"
+                          style="float:right; cursor:pointer; font-size:1.2rem; font-weight:700;
+                                 background:#fff; border-radius:50%; width:26px; height:26px;
+                                 display:flex; align-items:center; justify-content:center;
+                                 border:1px solid #333;">
+                        ?
+                    </span>
+
+                </h2>
+
+                <div class="option-group">
+                    <label><input type="checkbox" id="family-hx"> Familiar de primer grado con cáncer gástrico</label>
+                    <label><input type="checkbox" id="hpylori"> Persistencia de <em>H. pylori</em></label>
+                </div>
+            </section>
+
+            <!-- ============ BUTTONS ============ -->
+            <!-- ============ BUTTON ROW 1 ============ -->
+            <div class="btn-row" role="group" aria-label="Acciones">
+                <button id="calculate-btn" class="btn" type="button">Calcular seguimiento</button>
+                <button id="clear-btn" class="btn" type="button">Limpiar formulario</button>
+            </div>
+
+            <!-- ============ BUTTON ROW 2 (Acerca de + Reiniciar) ============ -->
+            <div class="menu-bar">
+                 <a href="index.html" class="menu-btn">← Reiniciar</a>
+                 <a id="about-btn" class="menu-btn">Acerca de…</a>
+            </div>
+
+
+            <!-- ============ RESULT ============ -->
+            <div id="result" role="status" aria-live="polite">
+                <h3>Recomendación:</h3>
+                <p>Seleccione opciones y pulse <strong>Calcular seguimiento</strong>.</p>
+            </div>
+
+            <!-- ============ FOOTER NOTE ============ -->
+            <p class="note-footer">
+                <em>
+                    <p>Esta herramienta es una guía basada en los algoritmos de la ESGE 2025. No sustituye el juicio clínico profesional. <br>
+                       Versión 1.0.0. © Paco Casado. Granada 2025.</p>
+                </em>
+            </p>
+
+        </div>
+    </form>
+
+    <!-- ============ MODAL HELP ============ -->
+    <div class="modal-overlay" id="modal-help" aria-hidden="true">
+        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <span class="close-modal" id="close-help" title="Cerrar">&times;</span>
+            <h3 id="modal-title">Información sobre Factores Clínicos</h3>
+            <div style="font-size:0.95rem; color:#222;">
+                <p><strong>1. Cribado en familiares de primer grado:</strong><br>
+                Se recomienda investigar y tratar H. Pylori entre los 20 y 30 años y realizar gastroscopia de cribado en familiares de primer grado de pacientes con cáncer gástrico.
+                Debe iniciarse a los <strong>45 años</strong> o <strong>10 años antes</strong> que la edad del caso índice (lo que ocurra antes).</p>
+
+                <p><strong>2. Cribado según pepsinógenos séricos:</strong><br>
+                Considerar cribado endoscópico en pacientes con <strong>niveles bajos de pepsinógeno tipo I</strong> y/o una <strong>baja ratio PGI/PGII</strong>,
+                especialmente si la serología para <em>H. pylori</em> es negativa.</p>
+
+                <p style="color:var(--muted); margin-top:8px; font-size:0.9rem;">
+                    Fuente: Guía ESGE 2025.
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- ========== MODAL ESTADIAJE HISTOLÓGICO ========== -->
+    <div id="modal-histo" class="modal-overlay" style="display:none;">
+        <div class="modal-box" style="max-width:650px;">
+            <span id="close-histo" class="close-modal">✕</span>
+            <h3>Clasificación histológica de la gastritis crónica / metaplasia</h3>
+
+            <!-- Botones OLGA / OLGIM -->
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button id="btn-olga" class="btn" data-img="OLGA.jpg" style="background:#0056a8; color:white;">OLGA</button>
+                <button id="btn-olgim" class="btn" data-img="OLGIM.jpg" style="background:#0056a8; color:white;">OLGIM</button>
+            </div>
+
+            <hr style="margin:18px 0;">
+
+            <h3>Clasificación endoscópica de la gastritis atrófica / metaplasia</h3>
+
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button id="btn-kimura" class="btn" data-img="KT2.jpg" style="background:#0056a8; color:white;">Kimura–Takemoto</button>
+                <button id="btn-eggim" class="btn" data-img="EGGIM.jpg" style="background:#0056a8; color:white;">EGGIM</button>
+            </div>
+
+        </div>
+    </div>
+         
+    <!-- ============ MODAL ACERCA DE ============ -->
+    <div id="about-modal" class="modal-overlay">
+        <div class="modal-box">
+            <span id="close-about" 
+                  style="float:right; cursor:pointer; font-size:1.3rem; font-weight:700;">
+                  ×
+            </span>
+
+            <video id="about-video" autoplay muted playsinline preload="auto" class="w-full">
+            <source src="DoctorCalc.mp4" type="video/mp4">
+            </video>
+
+            <div style="margin-top:16px; font-size:0.95rem; color:#222;">
+                <h3>Acerca de GastroCalc:</h3>
+                <div class="about-text">
+                    GastroCalc es una aplicación desarrollada por <strong>DoctorCalc ©</strong>, basada en las recomendaciones de la guía 
+                    <em>"Management of epithelial precancerous conditions and early neoplasia of the stomach (MAPS III): European Society of Gastrointestinal Endoscopy (ESGE), European Helicobacter and Microbiota Study Group (EHMSG) and European Society of Pathology (ESP) Guideline update 2025"</em>
+                    de la ESGE, publicada en la revista Endoscopy en 2025. No sustituye el juicio clínico profesional. Versión 1.0.0. © Paco Casado. Granada 2025 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="zoom-overlay">
+        <span id="zoom-close">✕</span>
+
+        <div id="zoom-inner">
+            <img id="zoom-img" src="">
+        </div>
+    </div>
+
+    <!-- Visor de imágenes avanzado -->
+    <div id="imageModal" class="modal-viewer" onclick="closeImageViewer(event)">
+        <div class="modal-content-wrapper">
+            <img id="fullImage" src="" alt="Imagen ampliada" onclick="toggleZoom(event)">
+        </div>
+        <button class="close-btn" onclick="closeImageViewer(event)">✕</button>
+    </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    // Elements
+    const form = document.getElementById("algo-form");
+    const resultDiv = document.getElementById("result");
+
+    const stagingGroup = document.getElementById("staging-group");
+    const riskFactorsGroup = document.getElementById("risk-factors-group");
+
+    const biopsiaNormal = document.getElementById("biopsia-normal");
+    const stages = document.querySelectorAll(".stage");
+    const gaAntralEl = document.getElementById("ga-antral");
+    const olga34El = document.getElementById("olga-olgim-3-4");
+    const c3eggimEl = document.getElementById("c3-eggim");
+    const aigEl = document.getElementById("gastritis-auto");
+
+    const calculateBtn = document.getElementById("calculate-btn");
+    const clearBtn = document.getElementById("clear-btn");
+
+    // Modal controls
+    const modal = document.getElementById("modal-help");
+    const openHelp = document.getElementById("open-help");
+    const closeHelp = document.getElementById("close-help");
+
+    openHelp.addEventListener("click", () => {
+        modal.style.display = "flex";
+        modal.setAttribute("aria-hidden","false");
+    });
+    closeHelp.addEventListener("click", () => {
+        modal.style.display = "none";
+        modal.setAttribute("aria-hidden","true");
+    });
+    modal.addEventListener("click", (e) => { if (e.target === modal) { modal.style.display = "none"; modal.setAttribute("aria-hidden","true"); } });
+
+    // Exclusión mutua: Biopsia normal <-> resto y Gastritis antral <-> OLGA/OLGIM III–IV y C3+ / EGGIM ≥5
+    gaAntralEl.addEventListener("change", () => {
+    if (gaAntralEl.checked) {
+        olga34El.checked = false;
+        c3eggimEl.checked = false;
+    }
+    });
+
+    olga34El.addEventListener("change", () => {
+    if (olga34El.checked) {
+        gaAntralEl.checked = false;
+    }
+    });
+
+    c3eggimEl.addEventListener("change", () => {
+    if (c3eggimEl.checked) {
+        gaAntralEl.checked = false;
+    }
+    });
+    
+    biopsiaNormal.addEventListener("change", () => {
+        if (biopsiaNormal.checked) {
+            stages.forEach(s => s.checked = false);
+        }
+    });
+    stages.forEach(s => {
+        s.addEventListener("change", () => {
+            if (s.checked) biopsiaNormal.checked = false;
+        });
+    });
+
+    // Hide staging/factors when LGD/HGD
+    function updateVisibility(){
+        const d = document.querySelector("input[name='dysplasia']:checked").value;
+        if (d === "lgd" || d === "hgd" || d === "indefinite") {
+            stagingGroup.style.display = "none";
+            riskFactorsGroup.style.display = "none";
+        } else {
+            stagingGroup.style.display = "";
+            riskFactorsGroup.style.display = "";
+        }
+    }
+    document.querySelectorAll("input[name='dysplasia']").forEach(r => r.addEventListener("change", updateVisibility));
+    updateVisibility();
+
+    // Clear button
+    clearBtn.addEventListener("click", () => {
+        // Uncheck all
+        document.querySelectorAll("input[type=checkbox], input[type=radio]").forEach(inp => inp.checked = false);
+        // set default dysplasia none
+        document.querySelector("input[name='dysplasia'][value='none']").checked = true;
+        updateVisibility();
+        // Reset result
+        resultDiv.innerHTML = `<h3>Recomendación:</h3><p>Seleccione opciones y pulse <strong>Calcular seguimiento</strong>.</p>`;
+        // Do not scroll
+    });
+
+    // Main algorithm
+calculateBtn.addEventListener("click", () => {
+// 1. VIBRACIÓN INMEDIATA (Feedback táctil)
+    if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(50); 
+    }
+    // Read inputs
+    const dys = document.querySelector("input[name='dysplasia']:checked").value;
+    const family = document.getElementById("family-hx").checked;
+    const hp = document.getElementById("hpylori").checked;
+
+    const imExt = document.getElementById("im-extensa").checked;
+    const imInc = document.getElementById("im-incompleta").checked;
+    const olga34 = document.getElementById("olga-olgim-3-4").checked;
+    const c3 = document.getElementById("c3-eggim").checked;
+    const olgim12 = document.getElementById("olgim-1-2").checked;
+    const olga02 = document.getElementById("olga-olgim-0-2").checked;
+
+    const gaAntral = gaAntralEl.checked;
+    const aig = aigEl.checked;
+    const normalBx = biopsiaNormal.checked;
+
+    const anyOtherHist = imExt || imInc || olga34 || c3 || olgim12 || olga02;
+    const anyHist = anyOtherHist || gaAntral || aig || normalBx;
+
+    // 0) Incompatibilidad inmediata: Biopsia normal + H. pylori persistente -> advertencia y salir
+    if (normalBx && hp) {
+        resultDiv.innerHTML = `
+            <h3>Advertencia:</h3>
+            <p style="font-size:1.05rem; color:#b30000; font-weight:700;">
+                Una biopsia no puede ser normal si existe infección persistente por <em>Helicobacter pylori</em>.
+            </p>
+            <p style="font-size:1rem;">
+                Siempre que hay <em>H. pylori</em> presente existe una gastritis crónica asociada. 
+                Por favor, revise los hallazgos histológicos seleccionados.
+            </p>
+        `;
+        resultDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+        return; // detiene el cálculo
+    }
+
+    // 0b) Si marca familiar 1.º grado y NO ha marcado NINGÚN hallazgo histológico -> abrir modal y salir
+    if (family && !anyHist) {
+        modal.style.display = "flex";
+        modal.setAttribute("aria-hidden", "false");
+        return;
+    }
+
+    // Inicializar resultado
+    let recommendation = "";
+    let risk = "low";
+
+    // 1) Displasia (si existe displasia, tiene prioridad y termina aquí)
+    if (dys === "hgd") {
+        risk = "high";
+        recommendation = "Si hay una lesión visible endoscópicamente, hay que hacer estadiaje y tratamiento correcto.<br>" +
+            "Si no hay lesión visible endoscópicamente, se deben seguir los siguientes pasos:<br>" +
+            "1. Reevaluación de la biopsia por otro patólogo experto.<br>" +
+            "2. Realizar nueva endoscopia de alta calidad (alta definición, cromoendoscopia virtual) con biopsias.<br>" +
+            "3. Estudiar H. pylori y erradicar, si no se había hecho antes.<br>" +
+            "4. Reevaluación en 6 meses (HGD).<br><br>";
+    } else if (dys === "lgd") {
+        risk = "high";
+        recommendation = "Si hay una lesión visible endoscópicamente, hay que hacer estadiaje y tratamiento correcto.<br>Si no hay lesión visible endoscópicamente, se deben seguir los siguientes pasos:<br>1. Reevaluación de la biopsia por otro patólogo experto.<br>2. Realizar nueva endoscopia de alta calidad (alta definición, Cromoendoscopia virtual) con biopsias.<br>3. Estudiar H. Pylori y erradicar, si no se había hecho antes.<br>4. Si la segunda endoscopia es normal, reevaluación en 12 meses (LGD).<br><br>";
+    } else if (dys === "indefinite") {
+        risk = "high";
+        recommendation = "Si hay una lesión visible endoscópicamente, se pueden hacer nuevas biopsias dirigidas o directamente resección endoscópica.<br>Si no hay lesión visible endoscópicamente, se deben seguir los siguientes pasos:<br>1. Reevaluación de la biopsia por otro patólogo experto.<br>2. Realizar nueva endoscopia de alta calidad (alta definición, Cromoendoscopia virtual) con biopsias.<br>3. Estudiar H. Pylori y erradicar, si no se había hecho antes.<br>4. Si la segunda endoscopia es normal, reevaluación en 12 meses (displasia Indefinida).<br><br>";
+    } else {
+        // 2) SIN displasia => empezamos las reglas específicas
+
+        // CASE A: Biopsia normal + familiar 1º grado (regla especial solicitada)
+        if (normalBx && family && !hp && !anyOtherHist && !gaAntral && !aig) {
+            risk = "moderate";
+            recommendation = "Actualmente, España no tiene un programa de cribado establecido para personas con antecedentes familiares de cáncer gástrico. " +
+                "Se ha sugerido un intervalo de 5 años para repetir la gastroscopia si no hay lesiones en la basal, pero no hay suficiente evidencia para esta recomendación. " +
+                "En cualquier caso, se entiende que el H. Pylori ha sido erradicado.<br>";
+        }
+
+        // CASE B: Biopsia normal aislada (sin familiares ni H.pylori ni otros marcadores)
+        else if (normalBx && !family && !hp && !anyOtherHist && !gaAntral && !aig) {
+            risk = "low";
+            recommendation = "No necesita cribado ni vigilancia.<br><br>";
+        }
+
+        // CASE C: Solo H. pylori marcado y NINGÚN hallazgo histológico (usuario pidió texto específico)
+        else if (hp && !family && !anyHist) {
+            // Nota: anyHist incluye normalBx; si normalBx y hp ya fue interceptado arriba.
+            risk = "moderate";
+            recommendation = "No ha marcado ningún hallazgo en la biopsia. No puede existir Helicobácter persistente sin gastritis, por lo que debe marcar lo que proceda.<br>" +
+                "Además, se debe intentar erradicar Helicobacter pylori, si se puede, para evitar la progresión de la gastritis.<br>";
+        }
+
+        // CASE D: Gastritis antral aislada
+        else if (gaAntral && !anyOtherHist && !aig && !normalBx) {
+            if (family || hp || imInc) {
+                risk = "moderate";
+                recommendation = "Vigilancia en 3 años (gastritis atrófica antral asociada a factor de riesgo).<br><br>";
+            } else {
+                risk = "low";
+                recommendation = "No necesita vigilancia (gastritis atrófica leve/moderada restringida al antro aislada).<br><br>";
+            }
+        }
+
+        // CASE E: Gastritis autoinmune aislada
+        else if (aig && !anyOtherHist && !gaAntral && !normalBx) {
+            risk = "moderate";
+            recommendation = "Vigilancia en 3 años (gastritis autoinmune). Vigilar tanto cáncer gástrico como tumores neuroendocrinos tipo I.<br><br>";
+        }
+
+        // CASE F: Marcadores de alto riesgo (IM extensa / IM incompleta / OLGA/OLGIM III-IV / C3+)
+        else {
+            const highMarker = imExt || imInc || olga34 || c3;
+
+            if (highMarker && family) {
+                risk = "high";
+                recommendation = "Vigilancia en 1–2 años (alto riesgo + familiar).<br><br>";
+            } else if (highMarker) {
+                risk = "moderate";
+                recommendation = "Vigilancia en 3 años (alto riesgo).<br><br>";
+            } else if (olgim12 && (family || hp)) {
+                risk = "moderate";
+                recommendation = "Vigilancia en 3 años (OLGIM I–II + factor de riesgo).<br><br>";
+            } else if (family || hp) {
+                // Nota: si llegamos aquí y family=true pero no hay hist, lo habría capturado arriba (abrir modal).
+                risk = "moderate";
+                recommendation = "Vigilancia en 3 años (factor clínico sin marcadores histológicos altos).<br><br>";
+            } else {
+                risk = "low";
+                recommendation = "Sin vigilancia (volver a cribado si procede).<br><br>";
+            }
+        }
+    } // end else (sin displasia)
+
+    // Añadir texto de erradicación H. pylori en la mayoría de casos (salvo si sólo aparece H.pylori sin hist o si biopsia normal con hp fue interceptado)
+    const onlyHp = hp && !family && !imExt && !imInc && !olga34 && !c3 && !olgim12 && !olga02 && !gaAntral && !aig && !normalBx;
+    if (hp && !normalBx && !onlyHp) {
+        // añadir solo si no está ya añadido
+        if (!recommendation.includes("erradicar Helicobacter pylori")) {
+            recommendation += " Además, se debe intentar erradicar Helicobacter pylori, si se puede, para evitar la progresión de la gastritis.";
+        }
+    }
+
+    // Append mandatory note (fuera de la parte en negrita)
+    const stopNote = " ESGE/EHMSG/ESP sugieren que se suspenda o no se inicie el cribado o la vigilancia del cáncer gástrico en personas asintomáticas mayores de 80 años, y que se tengan en cuenta las comorbilidades de los pacientes al planificar el tratamiento de lesiones superficiales.";
+    const noteText = recommendation.includes(stopNote) ? "" : stopNote;
+
+    // Visual pill
+    const pillClass = risk === "high" ? "pill-high" : (risk === "moderate" ? "pill-moderate" : "pill-low");
+    const riskText = risk === "high" ? "ALTO" : (risk === "moderate" ? "MODERADO" : "BAJO");
+
+    // Findings summary
+    const findings = [];
+    if (normalBx) findings.push("Biopsia normal");
+    if (imExt) findings.push("IM extensa");
+    if (imInc) findings.push("IM incompleta");
+    if (olga34) findings.push("OLGA/OLGIM III–IV");
+    if (c3) findings.push("C3+/EGGIM ≥5");
+    if (olgim12) findings.push("OLGIM I–II");
+    if (olga02) findings.push("OLGA/OLGIM 0–II");
+    if (gaAntral) findings.push("Gastritis atrófica antral");
+    if (aig) findings.push("Gastritis autoinmune");
+    if (family) findings.push("Familiar 1.º grado");
+    if (hp) findings.push("Persistencia H. pylori");
+    const findingsText = findings.length ? findings.join(" · ") : "Sin hallazgos seleccionados";
+
+    // Render result
+    resultDiv.innerHTML = `
+        <h3>Recomendación:</h3>
+        <p style="font-size:1.12rem; font-weight:700;">
+            Riesgo calculado: <span class="risk-pill ${pillClass}">${riskText}</span>
+        </p>
+        <p><strong>${recommendation}</strong></p>
+        <p>${noteText}</p>
+        <p style="color:var(--muted); margin-top:8px;"><strong>Hallazgos seleccionados:</strong> ${findingsText}.</p>
+    `;
+
+    // Scroll into view smoothly after render
+    resultDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+
+}); // end calculate
+
+window.addEventListener('hardwareBackPress', function () {
+    const imageModal = document.getElementById('imageModal');
+    const fullImage = document.getElementById('fullImage');
+    const modalHisto = document.getElementById('modal-histo');
+    const modalHelp = document.getElementById('modal-help');
+    const modalAbout = document.getElementById('about-modal');
+
+    // Función auxiliar para saber si algo es visible
+    const isVisible = (el) => el && window.getComputedStyle(el).display !== 'none';
+
+    // 1. Quitar zoom de la imagen
+    if (isVisible(imageModal) && fullImage && fullImage.classList.contains('zoomed')) {
+        fullImage.classList.remove('zoomed');
+        return;
+    }
+
+    // 2. Cerrar visor de imagen
+    if (isVisible(imageModal)) {
+        imageModal.style.display = "none";
+        document.body.style.overflow = "auto";
+        return;
+    }
+
+    // 3. Cerrar modal de Histología
+    if (isVisible(modalHisto)) {
+        modalHisto.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        return;
+    }
+
+    // 4. Cerrar modal de Ayuda
+    if (isVisible(modalHelp)) {
+        modalHelp.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        return;
+    }
+
+    // 5. Cerrar modal de Acerca de
+    if (isVisible(modalAbout)) {
+        modalAbout.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        return;
+    }
+
+    // 6. Si llegamos aquí es que no hay nada abierto: volver al inicio
+    window.location.href = 'index.html';
+});
+
+
+}); // end DOMContentLoaded
+    // ====================================================================
+    //        AYUDA ESTADIAJE HISTOLÓGICO (OLGA / OLGIM / Kimura / EGGIM)
+    // ====================================================================
+
+        const modalHisto = document.getElementById("modal-histo");
+        const openHisto = document.getElementById("open-histo-help");
+        const closeHisto = document.getElementById("close-histo");
+
+    // Abrir ventana
+    openHisto.addEventListener("click", () => {
+        modalHisto.style.display = "flex";
+    });
+
+    // Cerrar ventana
+    closeHisto.addEventListener("click", () => {
+         modalHisto.style.display = "none";
+         
+    });
+
+    // Cerrar clic fuera
+    modalHisto.addEventListener("click", (e) => {
+        if (e.target === modalHisto) modalHisto.style.display = "none";
+    });
+
+        
+    // =================== BOTONES QUE ABREN IMAGEN ===================
+    // =================== ZOOM AL CLIC ===================
+   document.addEventListener('DOMContentLoaded', function() {
+    // Configura los botones de tu modal de histología
+    const buttons = document.querySelectorAll('#modal-histo .btn');    buttons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Lee el nombre de la imagen (OLGA.jpg, etc.)
+            const nombreImagen = this.getAttribute('data-img'); 
+        
+        if (nombreImagen) {
+            openImageViewer(nombreImagen); // Abre la imagen correcta
+        }
+        });
+    });
+   });
+
+function openImageViewer(src) {
+    const modal = document.getElementById('imageModal');
+    const img = document.getElementById('fullImage');
+    img.src = src;
+    img.classList.remove('zoomed'); // Empieza sin zoom
+    modal.style.display = "block";
+    document.body.style.overflow = "hidden"; // Bloquea el scroll de la app
+}
+
+function closeImageViewer(event) {
+    // Cierra si pulsas la X o fuera de la imagen
+    if (event.target.id === 'imageModal' || 
+        event.target.className === 'close-btn' || 
+        event.target.className === 'modal-content-wrapper') {
+        
+        document.getElementById('imageModal').style.display = "none";
+        document.body.style.overflow = "auto";
+    }
+}
+
+function toggleZoom(event) {
+    event.stopPropagation();
+    const img = event.target;    img.classList.toggle('zoomed');
+    
+    // Si quitamos el zoom, volvemos arriba para que no se vea cortada la próxima vez
+    if (!img.classList.contains('zoomed')) {
+        document.getElementById('imageModal').scrollTop = 0;
+        document.getElementById('imageModal').scrollLeft = 0;
+    }
+}
+
+
+    // ========== MODAL ACERCA DE ==========
+    const aboutBtn = document.getElementById("about-btn");
+    const aboutModal = document.getElementById("about-modal");
+    const closeAbout = document.getElementById("close-about");
+    const aboutVideo = document.getElementById("about-video");
+
+    aboutBtn.addEventListener("click", () => {
+        // 1. Reset total del vídeo (Manteniéndolo invisible)
+        aboutVideo.style.opacity = "0";
+        aboutVideo.pause();
+        aboutVideo.currentTime = 0;
+        aboutVideo.load();
+        // 2. Abrir la modal
+        aboutModal.style.display = "flex";
+        aboutModal.setAttribute("aria-hidden","false");
+        // 3. Detectar el momento exacto en que empieza a reproducirse
+        // El evento 'playing' ocurre cuando el vídeo ya no está cargando ni pausado
+        aboutVideo.onplaying = () => {
+        aboutVideo.style.opacity = "1";
+        };
+        // 4. Intentar reproducir
+        aboutVideo.play().catch(error => {
+        console.log("Error autoplay:", error);
+        });
+    });   
+
+    // En el cierre, volvemos a poner la opacidad a 0
+    const handleClose = () => {
+        aboutModal.style.display = "none";
+        aboutModal.setAttribute("aria-hidden", "true");
+        aboutVideo.pause();
+        aboutVideo.currentTime = 0;
+        aboutVideo.style.opacity = "0"; 
+    };
+
+    closeAbout.addEventListener("click", handleClose);
+    aboutModal.addEventListener("click", (e) => {
+        if (e.target === aboutModal) handleClose();
+    });
+
+</script>
+
+</body>
+</html>
+

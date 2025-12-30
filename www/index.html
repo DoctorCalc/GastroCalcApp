@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Define el riesgo de cáncer gástrico y los intervalos de vigilancia según las guías ESGE 2025.">
+    <meta name="theme-color" content="#1f7832">
+    <title>GastroCalc - Aplicación</title>
+
+    <!-- Fuente moderna -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+    <style>
+        /* ======== Estilos base ======== */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f9fafb;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            text-align: center;
+            color: #222;
+        }
+
+        main.container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 380px; 
+            padding: 30px 15px; 
+            box-sizing: border-box;
+        }
+
+        /* ======== Logotipo ======== */
+        .logo-image {
+            width: 75%;
+            max-width: 250px;
+            height: auto;
+            margin-top: 30px;
+        }
+
+        /* ======== Texto descriptivo ======== */
+        .description-text {
+            font-size: 1em;
+            line-height: 1.5;
+            color: #333;
+            margin: 0;
+            padding: 0 10px;
+            margin-bottom: 25px;
+        }
+
+        /* ======== Botones ======== */
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            margin-bottom: 0px;
+        }
+
+        .calculator-button {
+            display: block;
+            width: 80%;
+            max-width: 280px;
+            padding: 12px;
+            background-color: #8f1e27; /* Un rojo similar al del logo */
+            color: #fff;
+            text-decoration: none;  /* Quita el subrayado si usas <a> */
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05em;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.15s ease;
+        }
+
+        .calculator-button:hover {
+            background-color: #40060b;    /* Rojo más oscuro al pasar el ratón */
+        }
+
+        /* ======== Responsividad ======== */
+         @media (min-width: 600px) {
+            main.container {
+                height: 90vh; 
+                max-width: 500px; 
+                justify-content: space-evenly; 
+            }
+            .logo-image {
+                /* AJUSTE FINAL DE TAMAÑO: Logo más pequeño en PC */
+                width: 50%; 
+                max-width: 180px; 
+                margin-bottom: 0; 
+            }
+            .description-text {
+                margin-bottom: 0;
+            }
+            .calculator-button {
+                font-size: 1em; /* Ligeramente más pequeños en PC */
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <img src="gastrocalc.jpg" alt="Logotipo de GastroCalc" class="logo-image">
+
+        <p class="description-text">
+            <strong>Aplicación para calcular el seguimiento de pacientes con riesgo de cáncer gástrico.</strong><br>
+            Basada en la guía de la <em>ESGE de 2025</em>.
+        </p>
+
+        <div class="buttons-container">
+            <a href="Calculagas.html" class="calculator-button" role="button">Iniciar Calculadora</a>
+        </div>
+    </main>
+    
+<div id="legalModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
+    <div style="background-color:white; padding:30px; border-radius:20px; width:85%; max-width:400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); font-family: sans-serif;">
+        <div style="text-align:center; margin-bottom:15px;">
+            <span style="font-size: 50px;">⚠️</span>
+        </div>
+        <h2 style="color:#333; margin-top:0; text-align:center; font-size:22px;">Aviso Legal</h2>
+        <div style="font-size:14px; line-height:1.6; color:#444; margin-bottom:20px; text-align: justify;">
+            <strong>GastroCalc</strong> es una herramienta de apoyo para <strong>profesionales sanitarios</strong>. No está diseñada para pacientes. 
+            <br><br>
+            Los cálculos se basan en literatura científica, pero <strong>no sustituyen el juicio clínico</strong>. El uso de esta app implica la aceptación de que el diagnóstico final es responsabilidad exclusiva del médico.
+        </div>
+        <button id="btnAceptarLegal" style="width:100%; background-color:#8f1e27; color:white; border:none; padding:15px; border-radius:12px; font-weight:bold; font-size:16px; cursor:pointer; box-shadow: 0 4px 10px rgba(0,122,255,0.3);">
+            Entiendo y Acepto
+        </button>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const modal = document.getElementById("legalModal");
+    const btnAceptar = document.getElementById("btnAceptarLegal");
+
+    // Si no ha aceptado antes, mostramos el modal
+    if (!localStorage.getItem("disclaimerAceptado")) {
+        modal.style.display = "flex";
+    }
+
+    // Al aceptar, guardamos en memoria y cerramos
+    btnAceptar.onclick = function() {
+        localStorage.setItem("disclaimerAceptado", "true");
+        modal.style.display = "none";
+    };
+});
+</script>
+</body>
+</html>
