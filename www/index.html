@@ -2,18 +2,32 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Define el riesgo de cáncer gástrico y los intervalos de vigilancia según las guías ESGE 2025.">
     <meta name="theme-color" content="#1f7832">
     <title>GastroCalc - Aplicación</title>
 
-    <!-- Fuente moderna -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
-    <!-- Favicon -->
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-
+    <link rel="manifest" href="/GastroCalcApp/www/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GastroCalc">
+    
+    <link rel="apple-touch-icon" href="/GastroCalcApp/www/icons/icon-192.png">
+    <link rel="icon" href="/GastroCalcApp/www/icons/icon-48.png" type="image/png">
+    
     <style>
+        /* Fuente moderna Poppins */
+        @font-face {
+            font-family: 'Poppins';
+            src: url('./fonts/poppins-v24-latin-regular.woff2') format('woff2');
+            font-weight: 400;
+        }
+        @font-face {
+            font-family: 'Poppins';
+            src: url('./fonts/poppins-v24-latin-600.woff2') format('woff2');
+            font-weight: 600;
+        }
+        
         /* ======== Estilos base ======== */
         html, body {
             height: 100%;
@@ -89,7 +103,10 @@
         .calculator-button:hover {
             background-color: #40060b;    /* Rojo más oscuro al pasar el ratón */
         }
-
+        /* Que el modal esté oculto por defecto para evitar el parpadeo */
+        #legalModal {
+            display: none; 
+        }
         /* ======== Responsividad ======== */
          @media (min-width: 600px) {
             main.container {
@@ -134,8 +151,12 @@
         <h2 style="color:#333; margin-top:0; text-align:center; font-size:22px;">Aviso Legal</h2>
         <div style="font-size:14px; line-height:1.6; color:#444; margin-bottom:20px; text-align: justify;">
             <strong>GastroCalc</strong> es una herramienta de apoyo para <strong>profesionales sanitarios</strong>. No está diseñada para pacientes. 
-            <br><br>
+            <br>
             Los cálculos se basan en literatura científica, pero <strong>no sustituyen el juicio clínico</strong>. El uso de esta app implica la aceptación de que el diagnóstico final es responsabilidad exclusiva del médico.
+            <br>
+            El usuario debe verificar que los datos introducidos son correctos.
+            <br>
+            El desarrollador no se hace responsable de errores u omisiones ni de las consecuencias derivadas del uso de esta información.
         </div>
         <button id="btnAceptarLegal" style="width:100%; background-color:#8f1e27; color:white; border:none; padding:15px; border-radius:12px; font-weight:bold; font-size:16px; cursor:pointer; box-shadow: 0 4px 10px rgba(0,122,255,0.3);">
             Entiendo y Acepto
@@ -144,21 +165,39 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const modal = document.getElementById("legalModal");
-    const btnAceptar = document.getElementById("btnAceptarLegal");
+        // Registro del Service Worker mejorado
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/ColonCalcApp/www/sw.js')
+                    .then(reg => console.log('SW registrado'))
+                    .catch(err => console.error('Error SW', err));
+            });
+        }
 
-    // Si no ha aceptado antes, mostramos el modal
-    if (!localStorage.getItem("disclaimerAceptado")) {
-        modal.style.display = "flex";
-    }
+        // Lógica del Modal
+       (function() {
+           const modal = document.getElementById("legalModal");
+           const btnAceptar = document.getElementById("btnAceptarLegal");
 
-    // Al aceptar, guardamos en memoria y cerramos
+           function verificarAviso() {
+        // Usamos una clave única para GastroCalc
+           const aceptado = localStorage.getItem("gastroCalc_legal");
+        
+           if (aceptado === "true") {
+               modal.style.setProperty("display", "none", "important");
+           } else {
+               modal.style.setProperty("display", "flex", "important");
+           }
+        }
+
+    verificarAviso();
+
     btnAceptar.onclick = function() {
-        localStorage.setItem("disclaimerAceptado", "true");
+        // Guardamos con la misma clave única
+        localStorage.setItem("gastroCalc_legal", "true");
         modal.style.display = "none";
     };
-});
+})();
 </script>
 </body>
 </html>

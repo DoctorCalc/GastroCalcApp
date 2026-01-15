@@ -2,65 +2,143 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Algoritmo Lesiones Precancerosas — ESGE 2025</title>
+    <link rel="manifest" href="/GastroCalcApp/www/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GastroCalc">
+
+    <link rel="apple-touch-icon" href="/GastroCalcApp/www/icons/icon-192.png">
+    <link rel="icon" href="/GastroCalcApp/www/icons/icon-48.png" type="image/png">
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        
         :root{
             --blue:#0056a8;
+            --red:#8f1e27;
             --muted:#666;
             --accent:#007bff;
         }
 
         body{
             font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background:#f4f7f6;
+            background:rgba(252, 237, 237, 0.5);
             color:#222;
             margin:0;
             padding:0;
+            width:100%;
+            overflow-x:hidden;   /* ← evita desplazamiento lateral */
+        }
+        
+        html, body {
+        /* Evita que el usuario seleccione texto accidentalmente al pulsar rápido */
+            -webkit-user-select: none;
+            user-select: none;
+    
+        /* Elimina el retraso de 300ms al pulsar (hace que la app se sienta más rápida) */
+            touch-action: manipulation;
+        }
+
+        /* Pero permite que en los inputs sí se pueda seleccionar texto para borrar/escribir */
+            input, textarea {
+            -webkit-user-select: text;
+            user-select: text;
         }
 
         /* ============ HEADER ============ */
         .header{
-            background: var(--blue);
+            background: var(--red);
             color:#fff;
             display:flex;
             align-items:center;
             justify-content:space-between;
-            gap:16px;
             padding:14px 20px;
-            flex-wrap:wrap;
         }
 
-        .header-logo{
-            height:60px;
-            width:auto;
+        /* --- ESTILOS GENERALES DE LOGOS --- */
+        .header-logo {
+        /* Limitamos el tamaño para que no se descontrolen en Web */
+            max-height: 55px; 
+            max-width: 130px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
         }
+        
+        .header-logo.left { order: 1; }
+        .header-logo.right { order: 3; }
 
-        .header-title{
-            flex:1;
-            text-align:center;
-            font-size:1.55rem;
-            font-weight:700;
-            margin:0;
+        .header-title {
+            grid-column: auto; /* Anulamos el comportamiento de grid */
+            flex: 1;           /* Toma el centro */
+            order: 2;          /* Se pone en medio */
+            margin-top: 0;
+            padding: 0 40px;
+            text-align: center; /* Centrado en web también */
         }
+        
+        /* --- DISEÑO PARA WEB (Flexbox) --- */
+        @media (min-width: 768px) {
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px 30px;
+            }
+
+            .header-logo {
+                max-height: 70px;
+                max-width: 180px;
+            }
+
+            .header-title {
+                flex: 1;
+                order: 2;
+                font-size:1.55rem;
+                font-weight:700;
+                margin-top: 0;
+                padding: 0 30px;
+                text-align: center; /* Centrado en web también */
+            }
+            .header-subtitle {
+                display: block;
+                font-size:0.85em;
+                font-weight: normal;
+                margin-top: 5px;
+                text-align: center; /* Justificado al centro */
+             }
+
+            .header-logo.left { order: 1; }
+            .header-logo.right { order: 3; }
+        }  
 
         /* ============ PAGE CONTAINER ============ */
         .container{
             max-width: 950px;
-            margin: 20px auto;
+            margin:0 auto;
             background: #fff;
             padding: 24px;
             border-radius:12px;
             box-shadow: 0 6px 18px rgba(0,0,0,0.06);
         }
-
+        .accent-red {
+            accent-color: #cc0404;
+        }
+        
+        .stage{
+            accent-color:#cc0404;
+        }
+        
         /* ============ SECTION STYLES ============ */
-        .section { margin-top:18px; border-radius:10px; padding:14px; box-shadow: 0 4px 10px rgba(0,0,0,0.12); border:1px solid rgba(0,0,0,0.15); }
+        .section { margin-top:18px; border-radius:10px; padding:14px; box-shadow: 0 4px 10px rgba(0,0,0,0.20); border:1px solid rgba(0,0,0,0.25); }
         .section-instrucciones { background:#e6e5dc; }
-        .section-displasia { background:#b1d0fa; }
-        .section-staging  { background:#8dfcbd; }
-        .section-clinical { background:#f7c6b7; }
+        .section-displasia { background:rgba(252, 56, 56, 0.2); }
+        .section-staging  { background:rgba(252, 134, 56, 0.2); }
+        .section-clinical { background:rgba(217, 85, 85, 0.3); }
         .section-quality  { background:#fdfdfd; border:1px solid #e0e0e0; }
 
         h2{ margin:0 0 8px 0; font-size:1.15rem; }
@@ -103,8 +181,23 @@
             font-size:1rem;
         }
         
+        .btn:hover {
+            filter: brightness(0.92);
+        }
+        
+        .btn:active {
+            filter: brightness(0.80);
+        }
+        
+        /* Clase específica para botones con nombres largos dentro de modales */
+        .btn-small {
+            font-size: 0.88rem !important; /* Un poco más pequeña que el 1rem estándar */
+            padding: 10px 4px !important;  /* Reducimos el padding lateral para que quepa más texto */
+            white-space: nowrap;           /* Evita que el texto se parta en dos líneas */
+        }
+
         #calculate-btn {
-            background:var(--accent);
+            background:var(--red);
             color:#fff;
             border:0;
             padding:12px 18px;
@@ -115,20 +208,20 @@
 
            /* relieve */
             box-shadow:
-            0 4px 0 #003799,      /* borde inferior tipo botón físico */
+            0 4px 0 #4a0202,      /* borde inferior tipo botón físico */
             0 6px 12px rgba(0,0,0,0.18); /* sombra suave exterior */
 
             transition:transform .15s, box-shadow .15s, background .2s;
         }
         
         #calculate-btn:hover {
-            background:0082e6;
+            background:#750202;
         }
         
         #calculate-btn:active{
             transform:translateY(2px);     /* hundimiento */
             box-shadow:
-            0 2px 0 #003799,
+            0 2px 0 #4a0202,
             0 3px 6px rgba(0,0,0,0.18);
         }
         
@@ -151,14 +244,6 @@
             0 3px 6px rgba(0,0,0,0.12);
         }
         
-        .btn:hover {
-            filter: brightness(0.92);
-        }
-        
-        .btn:active {
-            filter: brightness(0.80);
-        }
-
         .menu-btn{
             display:inline-block;
             cursor: pointer;
@@ -168,6 +253,7 @@
             color:#222;
             padding:10px 14px;
             border-radius:8px;
+            border: none;
             font-weight:600;
             font-size:0.95rem;
             box-shadow:
@@ -197,8 +283,8 @@
             margin-top:22px;
             padding:16px;
             border-radius:10px;
-            background:#eef7ff;
-            border:1px solid #cfe5ff;
+            background:rgba(255, 228, 207, 0.3);
+            border:1px solid rgba(112, 2, 2, 1.0);
         }
         .risk-pill{
             display:inline-block;
@@ -216,54 +302,191 @@
         .info-help{ float:right; font-size:1.3rem; font-weight:700; cursor:pointer; color:#444; }
 
         /* ============ MODAL ============ */
-        .modal-overlay{
-            position:fixed; inset:0; background: rgba(0,0,0,0.55);
-            display:none; justify-content:center; align-items:center; z-index:5000;
+        .modal-overlay {
+            position: fixed;
+            inset: 0;           /* Cubre exactamente la ventana, sin pasarse */
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            display: none;      /* Se activa con .active o JS */
+            align-items: center;
+            justify-content: center;
+            padding: 15px;      /* Espacio de seguridad para que la caja no pegue al borde */
         }
-        .modal-box{
-            background:#fff; max-width:560px; width:90%; padding:20px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.25);
+
+        .modal-overlay.active {
+            display: flex !important;
+        }
+
+        .modal-box {
+            background: #fff;
+            max-width: 560px;
+            width: 100%;        /* Ocupará el máximo permitido por el padding del padre */
+            padding: 24px;
+            border-radius: 12px;
+            position: relative;
+            margin: auto;       /* EL GRAN TRUCO: centra en todas direcciones */
+    
+            max-height: 90vh;
+            overflow-y: auto; 
         }
         
-        .close-modal{ float:right; cursor:pointer; font-weight:700; font-size:1.1rem; color:#555; }
+        .close-modal {
+        /* Posicionamiento en la esquina */
+            position: absolute;
+            top: 8px;
+            right: 8px;
+    
+        /* Tamaño del área táctil (círculo) */
+            width: 40px;
+            height: 40px;
+    
+        /* Centrado perfecto de la X dentro del círculo */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+    
+        /* Estilo del símbolo */
+            font-size: 30px;
+            font-family: Arial, sans-serif;
+            color: #666;
+            line-height: 0; /* Evita que la X se desplace hacia abajo */
+            cursor: pointer;
+    
+        /* Preparación para la animación */
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+
+        /* EFECTO AL PASAR EL RATÓN (Hover) */
+        .close-modal:hover {
+            background-color: rgba(0, 0, 0, 0.08); /* Círculo gris suave */
+            color: #cc0404;                      /* X en color rojo */
+            transform: rotate(90deg);            /* La X gira un cuarto de vuelta */
+        }
+
+        /* EFECTO AL PULSAR (Active) */
+        .close-modal:active {
+            background-color: rgba(0, 0, 0, 0.15);
+            transform: rotate(90deg) scale(0.9); /* Se encoge un poquito al tocarlo */
+        }
+        
+        .modal-content-text {
+            font-size: 0.95rem;
+            color: #222;
+            text-align: justify;
+            hyphens: auto;
+            -webkit-hyphens: auto;
+            line-height: 1.5; /* Un poco más de aire para mejorar la lectura */
+        }
+
+        .modal-content-text p {
+            margin-bottom: 15px; /* Separación limpia entre los puntos 1 y 2 */
+        }
+
+        .source-text {
+            color: var(--muted);
+            margin-top: 12px;
+            font-size: 0.85rem;
+            font-style: italic;
+            text-align: right; /* La fuente suele quedar mejor alineada a la derecha */
+        }
 
         /* ============ NOTE FOOTER ============ */
-        .note-footer{
-            margin-top:36px;
-            text-align:center;
-            font-size:0.92rem;
-            color:var(--muted);
+        .note-footer {
+            text-align: justify;
+            hyphens: auto;
+            -webkit-hyphens: auto; /* Para compatibilidad con algunos móviles antiguos */
+            font-size: 0.85rem;    /* Tamaño discreto */
+            color: #6b7280;        /* Gris suave (text-gray-500) */
+            line-height: 1.4;
+            margin-top: 25px;      /* Espacio respecto a la calculadora */
+            padding: 0 5px;        /* Un poco de aire en los bordes */
+        }
+
+        .footer-version {
+            display: block;        /* Hace que la versión y autor bajen a una línea nueva */
+            margin-top: 8px;
+            font-size: 0.8rem;
+            text-align: center;    /* El copyright suele quedar mejor centrado */
+            opacity: 0.8;
         }
 
         /* ============ RESPONSIVE ============ */
-        @media (max-width:700px){
-            .header{
-                justify-content:space-between;
-                text-align:center;
+       @media (max-width:767px){
+            /* --- DISEÑO PARA MÓVIL (Grid Estricto) --- */
+            .header {
+                background: var(--red);
+                color:#fff;
+                display: grid;
+            /* Forzamos dos columnas exactamente iguales */
+                grid-template-columns: 1fr 1fr; 
+            /* El título irá en una fila nueva (fila 2) */
+                grid-template-rows: auto auto; 
+                gap: 10px;
+                align-items: center;
+                padding: 15px 8px;
             }
 
-            .left-logo{
-                order:1;
+            /* Logo izquierda pegado a su borde */
+            .header-logo.left {
+                justify-self: start;
             }
 
-            .right-logo{
-                order:1;
+            /* Logo derecha pegado a su borde */
+            .header-logo.right {
+                justify-self: end;
             }
 
-            .header-logo{
-                height:52px;
+            .header-logo {
+                height: 55px;        /* Altura fija para que ambos logos se vean iguales */
+                width: auto;         /* Mantiene la proporción original */
+                max-width: 110px;    /* ¡Añadido! Evita que logos anchos roben espacio al título */
+                object-fit: contain;
             }
 
-            .header-title{
-                width:100%;
-                order:2;
-                margin-top:8px;
-                font-size:1.25rem;
+            /* El título ocupa las 2 columnas para irse abajo solo */
+            .header-title {
+                grid-column: span 2; /* Ocupa las dos columnas */
+                grid-row: 2;        /* Se fuerza a la segunda fila */
+                text-align: center; /* Justificado al centro */
+                /*margin-top: 5px; */
+                font-size: 1.15rem;
+                line-height: 1.2;
+                letter-spacing: -0.01em; /* Aprieta un poco las letras para que quepan más */
+                /* Eliminamos márgenes laterales si los hubiera */
+                padding-left: 0;
+                padding-right: 0;
             }
 
-            .btn-row{ flex-direction:column; }
-            .option-group label{ padding:12px; margin:8px 0; }
-            .container{ padding:16px; margin:12px; }
-        }
+            .header-subtitle {
+                display: block;
+                font-size: 0.9rem;
+                font-weight: normal;
+                margin-top: 4px;
+                text-align: center; /* Justificado al centro */
+            }
+
+           .btn-row{
+               flex-direction:column;
+           }
+
+           .option-group label{
+               padding:12px;
+               margin:8px 0;
+           }
+
+           .container{
+               padding:16px;
+               margin:12px;
+           }
+           
+           .modal-box {
+           /* SEGURIDAD PARA MÓVILES: */
+            max-height: 85vh;      /* No ocupa más del 85% de la altura de la pantalla */
+            overflow-y: auto;      /* Si el texto es largo, aparece scroll solo dentro del modal */
+           }
+       }
          
         .img-modal {
             display:none;
@@ -311,8 +534,8 @@
             max-width: none !important;
             max-height: none !important;
     
-            /* Forzamos el tamaño al 250% del ancho de la pantalla */
-            width: 250vw !important; 
+            /* Forzamos el tamaño al 200% del ancho de la pantalla */
+            width: 200vw !important; 
             height: auto !important; /* La altura se calcula sola según el ancho */
     
             /* Aseguramos que no haya otras reglas interfiriendo */
@@ -350,20 +573,74 @@
             width: 90%;
             box-shadow: 0 4px 12px rgba(0,0,0,0.25);
         }
-        .about-text {
+        .about-text, .text-justify {
+            text-align: justify;
+            hyphens: auto;      /* Divide las palabras largas con guiones si es necesario */
+            text-justify: inter-word; /* Mejora el reparto del espacio */
+        }
+
+        .risk-line {
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-align: left; /* Forzamos alineación izquierda */
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .recommendation-text {
+            text-align: justify;
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.2;
+    
+        /* Forzar guionado */
+            -webkit-hyphens: auto;
+            hyphens: auto;
+    
+        /* Esto soluciona los espacios gigantes en frases cortas */
+            text-justify: distribute; 
+    
+        /* Espacio inferior para no necesitar <br><br> */
+           margin-bottom: 20px; 
+        }
+        
+        .mandatory-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 10px;
+            background-color: #f1f8e9; /* Fondo verde tenue */
+            border-radius: 8px;
+            border-left: 4px solid #2e7d32; /* Barra lateral verde */
+        }
+
+        .mandatory-note span:last-child {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #333;
             text-align: justify;
         }
 
+        .info-icon-green {
+            color: #2e7d32;
+            font-size: 1.2rem;
+            font-weight: bold;
+            line-height: 1;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 
 <body>
 
     <!-- ============ HEADER ============ -->
-    <div class="header">
-        <img src="LogoDoctorCalc.jpg" alt="Logo DoctorCalc" class="header-logo left">
-        <h1 class="header-title">Algoritmo de Seguimiento de Lesiones Precancerosas Gástricas<br>(Basado en las recomendaciones de la ESGE 2025)</h1>
+    <div class="header card-container"> <img src="LogoDoctorCalc.jpg" alt="Logo DoctorCalc" class="header-logo left">
         <img src="logodige.jpg" alt="Logo DIGE" class="header-logo right">
+        <h1 class="header-title">
+            Algoritmo de Seguimiento de Lesiones Precancerosas Gástricas
+            <br>
+            <span class="header-subtitle">(Basado en las recomendaciones de la ESGE 2025)</span>
+        </h1>
     </div>
 
     <!-- ============ FORM (wrap all interactive controls) ============ -->
@@ -372,7 +649,7 @@
 
             <!-- ============ QUALITY / BIOPSY PROTOCOL ============ -->
             <details class="info-box">
-                <summary style="font-weight:700; cursor:pointer; padding:6px 8px; font-size:1.5rem;">Requisitos de Calidad Endoscópica y Protocolo de Biopsias</summary>
+                <summary style="font-weight:700; cursor:pointer; padding:6px 8px; font-size:1.15rem;">Requisitos de Calidad Endoscópica y Protocolo de Biopsias</summary>
                 <div style="padding:10px 8px 6px 8px; font-size:0.95rem; color:#222;">
                     <h3>Requisitos de calidad de la gastroscopia</h3>
                     <ul>
@@ -404,7 +681,7 @@
 
             <section class="section section-instrucciones" aria-labelledby="instrucciones-title">
             
-            <div style="color:#222;">
+            <div class="about-text" style="color:#222;">
                 <h3 id="instrucciones-title">Marque las casillas que correspondan a los hallazgos de la biopsia y factores clínicos, teniendo en cuenta que la displasia manda sobre todos ellos. Si quiere ver los criterios de calidad de la endoscopia, pulse sobre el título de arriba.</h3>
             </div>    
             </section>
@@ -414,10 +691,10 @@
                 <h2 id="displasia-title">1. Displasia</h2>
 
                 <div class="option-group" role="radiogroup" aria-label="Displasia">
-                    <label><input type="radio" name="dysplasia" value="none" checked> Sin displasia</label>
-                    <label><input type="radio" name="dysplasia" value="indefinite"> Displasia indefinida</label>
-                    <label><input type="radio" name="dysplasia" value="lgd"> Displasia de bajo grado (LGD)</label>
-                    <label><input type="radio" name="dysplasia" value="hgd"> Displasia de alto grado (HGD)</label>
+                    <label><input type="radio" class="accent-red" name="dysplasia" value="none" checked> Sin displasia</label>
+                    <label><input type="radio" class="accent-red" name="dysplasia" value="indefinite"> Displasia indefinida</label>
+                    <label><input type="radio" class="accent-red" name="dysplasia" value="lgd"> Displasia de bajo grado (LGD)</label>
+                    <label><input type="radio" class="accent-red" name="dysplasia" value="hgd"> Displasia de alto grado (HGD)</label>
                 </div>
             </section>
 
@@ -464,8 +741,8 @@
                 </h2>
 
                 <div class="option-group">
-                    <label><input type="checkbox" id="family-hx"> Familiar de primer grado con cáncer gástrico</label>
-                    <label><input type="checkbox" id="hpylori"> Persistencia de <em>H. pylori</em></label>
+                    <label><input type="checkbox" class="accent-red" id="family-hx"> Familiar de primer grado con cáncer gástrico</label>
+                    <label><input type="checkbox" class="accent-red" id="hpylori"> Persistencia de <em>H. pylori</em></label>
                 </div>
             </section>
 
@@ -478,8 +755,12 @@
 
             <!-- ============ BUTTON ROW 2 (Acerca de + Reiniciar) ============ -->
             <div class="menu-bar">
-                 <a href="index.html" class="menu-btn">← Reiniciar</a>
-                 <a id="about-btn" class="menu-btn">Acerca de…</a>
+                <button type="button" class="menu-btn" onclick="window.location.href='index.html'">
+                    ← Reiniciar
+                </button>
+                <button type="button" id="about-btn" class="menu-btn">
+                    Acerca de…
+                </button>
             </div>
 
 
@@ -490,12 +771,15 @@
             </div>
 
             <!-- ============ FOOTER NOTE ============ -->
-            <p class="note-footer">
+            <div class="note-footer">
                 <em>
-                    <p>Esta herramienta es una guía basada en los algoritmos de la ESGE 2025. No sustituye el juicio clínico profesional. <br>
-                       Versión 1.0.0. © Paco Casado. Granada 2025.</p>
+                    Esta herramienta es una guía basada en los algoritmos de la ESGE 2025. 
+                    No sustituye el juicio clínico profesional.
+                    <span class="footer-version">
+                        Versión 1.0.0. © Paco Casado. Granada 2025.
+                    </span>
                 </em>
-            </p>
+            </div>
 
         </div>
     </form>
@@ -505,31 +789,33 @@
         <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
             <span class="close-modal" id="close-help" title="Cerrar">&times;</span>
             <h3 id="modal-title">Información sobre Factores Clínicos</h3>
-            <div style="font-size:0.95rem; color:#222;">
+        
+            <div class="modal-content-text">
                 <p><strong>1. Cribado en familiares de primer grado:</strong><br>
-                Se recomienda investigar y tratar H. Pylori entre los 20 y 30 años y realizar gastroscopia de cribado en familiares de primer grado de pacientes con cáncer gástrico.
+                Se recomienda investigar y tratar H. Pylori entre los 20 y 30 años y realizar gastroscopia de cribado en familiares de primer grado de pacientes con cáncer gástrico. 
                 Debe iniciarse a los <strong>45 años</strong> o <strong>10 años antes</strong> que la edad del caso índice (lo que ocurra antes).</p>
 
                 <p><strong>2. Cribado según pepsinógenos séricos:</strong><br>
-                Considerar cribado endoscópico en pacientes con <strong>niveles bajos de pepsinógeno tipo I</strong> y/o una <strong>baja ratio PGI/PGII</strong>,
+                Considerar cribado endoscópico en pacientes con <strong>niveles bajos de pepsinógeno tipo I</strong> y/o una <strong>baja ratio PGI/PGII</strong>, 
                 especialmente si la serología para <em>H. pylori</em> es negativa.</p>
 
-                <p style="color:var(--muted); margin-top:8px; font-size:0.9rem;">
+                <p class="source-text">
                     Fuente: Guía ESGE 2025.
                 </p>
             </div>
         </div>
     </div>
+    
     <!-- ========== MODAL ESTADIAJE HISTOLÓGICO ========== -->
     <div id="modal-histo" class="modal-overlay" style="display:none;">
         <div class="modal-box" style="max-width:650px;">
-            <span id="close-histo" class="close-modal">✕</span>
+            <span id="close-histo" class="close-modal">&times;</span>
             <h3>Clasificación histológica de la gastritis crónica / metaplasia</h3>
 
             <!-- Botones OLGA / OLGIM -->
             <div style="display:flex; gap:10px; margin-top:10px;">
-                <button id="btn-olga" class="btn" data-img="OLGA.jpg" style="background:#0056a8; color:white;">OLGA</button>
-                <button id="btn-olgim" class="btn" data-img="OLGIM.jpg" style="background:#0056a8; color:white;">OLGIM</button>
+                <button id="btn-olga" class="btn btn-small" data-img="OLGA.jpg" style="background:#8f1e27; color:white;">OLGA</button>
+                <button id="btn-olgim" class="btn btn-small" data-img="OLGIM.jpg" style="background:#8f1e27; color:white;">OLGIM</button>
             </div>
 
             <hr style="margin:18px 0;">
@@ -537,8 +823,8 @@
             <h3>Clasificación endoscópica de la gastritis atrófica / metaplasia</h3>
 
             <div style="display:flex; gap:10px; margin-top:10px;">
-                <button id="btn-kimura" class="btn" data-img="KT2.jpg" style="background:#0056a8; color:white;">Kimura–Takemoto</button>
-                <button id="btn-eggim" class="btn" data-img="EGGIM.jpg" style="background:#0056a8; color:white;">EGGIM</button>
+                <button id="btn-kimura" class="btn btn-small" data-img="KT2.jpg" style="background:#8f1e27; color:white;">Kimura–Takemoto</button>
+                <button id="btn-eggim" class="btn btn-small" data-img="EGGIM.jpg" style="background:#8f1e27; color:white;">EGGIM</button>
             </div>
 
         </div>
@@ -547,11 +833,7 @@
     <!-- ============ MODAL ACERCA DE ============ -->
     <div id="about-modal" class="modal-overlay">
         <div class="modal-box">
-            <span id="close-about" 
-                  style="float:right; cursor:pointer; font-size:1.3rem; font-weight:700;">
-                  ×
-            </span>
-
+            <span id="close-about" class="close-modal" title="Cerrar">&times;</span>
             <video id="about-video" autoplay muted playsinline preload="auto" class="w-full">
             <source src="DoctorCalc.mp4" type="video/mp4">
             </video>
@@ -561,17 +843,12 @@
                 <div class="about-text">
                     GastroCalc es una aplicación desarrollada por <strong>DoctorCalc ©</strong>, basada en las recomendaciones de la guía 
                     <em>"Management of epithelial precancerous conditions and early neoplasia of the stomach (MAPS III): European Society of Gastrointestinal Endoscopy (ESGE), European Helicobacter and Microbiota Study Group (EHMSG) and European Society of Pathology (ESP) Guideline update 2025"</em>
-                    de la ESGE, publicada en la revista Endoscopy en 2025. No sustituye el juicio clínico profesional. Versión 1.0.0. © Paco Casado. Granada 2025 
+                    de la ESGE, publicada en la revista Endoscopy en 2025. No sustituye el juicio clínico profesional. 
+                    <span class="footer-version">
+                        Versión 1.0.0. © Paco Casado. Granada 2025.
+                    </span> 
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div id="zoom-overlay">
-        <span id="zoom-close">✕</span>
-
-        <div id="zoom-inner">
-            <img id="zoom-img" src="">
         </div>
     </div>
 
@@ -589,6 +866,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Elements
     const form = document.getElementById("algo-form");
     const resultDiv = document.getElementById("result");
+    resultDiv.classList.add('about-text');
 
     const stagingGroup = document.getElementById("staging-group");
     const riskFactorsGroup = document.getElementById("risk-factors-group");
@@ -608,15 +886,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const openHelp = document.getElementById("open-help");
     const closeHelp = document.getElementById("close-help");
 
+    // Abrir modal
     openHelp.addEventListener("click", () => {
-        modal.style.display = "flex";
-        modal.setAttribute("aria-hidden","false");
+        modal.classList.add("active"); // Esto activa el 'display: flex' del CSS
+        modal.setAttribute("aria-hidden", "false");
     });
+
+    // Cerrar modal
     closeHelp.addEventListener("click", () => {
-        modal.style.display = "none";
-        modal.setAttribute("aria-hidden","true");
+         modal.classList.remove("active"); // Esto vuelve al 'display: none'
+         modal.setAttribute("aria-hidden", "true");
     });
-    modal.addEventListener("click", (e) => { if (e.target === modal) { modal.style.display = "none"; modal.setAttribute("aria-hidden","true"); } });
+    // Cerrar modal al pulsar fuera (Corregido)
+    modal.addEventListener("click", (e) => { 
+        if (e.target === modal) { 
+            modal.classList.remove("active"); // Usamos siempre la clase para ser consistentes
+            modal.setAttribute("aria-hidden", "true"); 
+        } 
+    });
 
     // Exclusión mutua: Biopsia normal <-> resto y Gastritis antral <-> OLGA/OLGIM III–IV y C3+ / EGGIM ≥5
     gaAntralEl.addEventListener("change", () => {
@@ -734,8 +1021,8 @@ calculateBtn.addEventListener("click", () => {
             "Si no hay lesión visible endoscópicamente, se deben seguir los siguientes pasos:<br>" +
             "1. Reevaluación de la biopsia por otro patólogo experto.<br>" +
             "2. Realizar nueva endoscopia de alta calidad (alta definición, cromoendoscopia virtual) con biopsias.<br>" +
-            "3. Estudiar H. pylori y erradicar, si no se había hecho antes.<br>" +
-            "4. Reevaluación en 6 meses (HGD).<br><br>";
+            "3. Estudiar H. Pylori y erradicar, si no se había hecho antes.<br>" +
+            "4. Si la segunda endoscopia es normal, reevaluación en 6 meses (HGD).<br><br>";
     } else if (dys === "lgd") {
         risk = "high";
         recommendation = "Si hay una lesión visible endoscópicamente, hay que hacer estadiaje y tratamiento correcto.<br>Si no hay lesión visible endoscópicamente, se deben seguir los siguientes pasos:<br>1. Reevaluación de la biopsia por otro patólogo experto.<br>2. Realizar nueva endoscopia de alta calidad (alta definición, Cromoendoscopia virtual) con biopsias.<br>3. Estudiar H. Pylori y erradicar, si no se había hecho antes.<br>4. Si la segunda endoscopia es normal, reevaluación en 12 meses (LGD).<br><br>";
@@ -750,7 +1037,7 @@ calculateBtn.addEventListener("click", () => {
             risk = "moderate";
             recommendation = "Actualmente, España no tiene un programa de cribado establecido para personas con antecedentes familiares de cáncer gástrico. " +
                 "Se ha sugerido un intervalo de 5 años para repetir la gastroscopia si no hay lesiones en la basal, pero no hay suficiente evidencia para esta recomendación. " +
-                "En cualquier caso, se entiende que el H. Pylori ha sido erradicado.<br>";
+                "En cualquier caso, se entiende que el H. Pylori ha sido erradicado.<br><br>";
         }
 
         // CASE B: Biopsia normal aislada (sin familiares ni H.pylori ni otros marcadores)
@@ -764,14 +1051,14 @@ calculateBtn.addEventListener("click", () => {
             // Nota: anyHist incluye normalBx; si normalBx y hp ya fue interceptado arriba.
             risk = "moderate";
             recommendation = "No ha marcado ningún hallazgo en la biopsia. No puede existir Helicobácter persistente sin gastritis, por lo que debe marcar lo que proceda.<br>" +
-                "Además, se debe intentar erradicar Helicobacter pylori, si se puede, para evitar la progresión de la gastritis.<br>";
+                "Además, se debe intentar erradicar Helicobacter pylori, si se puede, para evitar la progresión de la gastritis.<br><br>";
         }
 
         // CASE D: Gastritis antral aislada
         else if (gaAntral && !anyOtherHist && !aig && !normalBx) {
             if (family || hp || imInc) {
                 risk = "moderate";
-                recommendation = "Vigilancia en 3 años (gastritis atrófica antral asociada a factor de riesgo).<br><br>";
+                recommendation = "Vigilancia con endoscopia en 3 años (gastritis atrófica antral asociada a factor de riesgo).<br><br>";
             } else {
                 risk = "low";
                 recommendation = "No necesita vigilancia (gastritis atrófica leve/moderada restringida al antro aislada).<br><br>";
@@ -781,7 +1068,7 @@ calculateBtn.addEventListener("click", () => {
         // CASE E: Gastritis autoinmune aislada
         else if (aig && !anyOtherHist && !gaAntral && !normalBx) {
             risk = "moderate";
-            recommendation = "Vigilancia en 3 años (gastritis autoinmune). Vigilar tanto cáncer gástrico como tumores neuroendocrinos tipo I.<br><br>";
+            recommendation = "Vigilancia con endoscopia en 3 años (gastritis autoinmune). Vigilar tanto cáncer gástrico como tumores neuroendocrinos tipo I.<br><br>";
         }
 
         // CASE F: Marcadores de alto riesgo (IM extensa / IM incompleta / OLGA/OLGIM III-IV / C3+)
@@ -790,17 +1077,17 @@ calculateBtn.addEventListener("click", () => {
 
             if (highMarker && family) {
                 risk = "high";
-                recommendation = "Vigilancia en 1–2 años (alto riesgo + familiar).<br><br>";
+                recommendation = "Vigilancia con endoscopia en 1–2 años (alto riesgo + familiar).<br><br>";
             } else if (highMarker) {
                 risk = "moderate";
-                recommendation = "Vigilancia en 3 años (alto riesgo).<br><br>";
+                recommendation = "Vigilancia con endoscopia en 3 años.<br><br>";
             } else if (olgim12 && (family || hp)) {
                 risk = "moderate";
-                recommendation = "Vigilancia en 3 años (OLGIM I–II + factor de riesgo).<br><br>";
+                recommendation = "Vigilancia con endoscopia en 3 años (OLGIM I–II + factor de riesgo).<br><br>";
             } else if (family || hp) {
                 // Nota: si llegamos aquí y family=true pero no hay hist, lo habría capturado arriba (abrir modal).
                 risk = "moderate";
-                recommendation = "Vigilancia en 3 años (factor clínico sin marcadores histológicos altos).<br><br>";
+                recommendation = "Vigilancia con endoscopia en 3 años (factor clínico sin marcadores histológicos altos).<br><br>";
             } else {
                 risk = "low";
                 recommendation = "Sin vigilancia (volver a cribado si procede).<br><br>";
@@ -817,9 +1104,13 @@ calculateBtn.addEventListener("click", () => {
         }
     }
 
-    // Append mandatory note (fuera de la parte en negrita)
-    const stopNote = " ESGE/EHMSG/ESP sugieren que se suspenda o no se inicie el cribado o la vigilancia del cáncer gástrico en personas asintomáticas mayores de 80 años, y que se tengan en cuenta las comorbilidades de los pacientes al planificar el tratamiento de lesiones superficiales.";
-    const noteText = recommendation.includes(stopNote) ? "" : stopNote;
+    // Append mandatory note (ahora con icono)
+    const stopNote = "ESGE/EHMSG/ESP sugieren que se suspenda o no se inicie el cribado o la vigilancia del cáncer gástrico en personas asintomáticas mayores de 80 años, y que se tengan en cuenta las comorbilidades de los pacientes al planificar el tratamiento de lesiones superficiales.";
+
+    // Si la nota debe mostrarse, le añadimos el icono al principio
+    const noteText = recommendation.includes(stopNote) 
+    ? "" 
+    : `<span class="info-icon-green">ⓘ</span><span>${stopNote}</span>`;
 
     // Visual pill
     const pillClass = risk === "high" ? "pill-high" : (risk === "moderate" ? "pill-moderate" : "pill-low");
@@ -843,12 +1134,15 @@ calculateBtn.addEventListener("click", () => {
     // Render result
     resultDiv.innerHTML = `
         <h3>Recomendación:</h3>
-        <p style="font-size:1.12rem; font-weight:700;">
-            Riesgo calculado: <span class="risk-pill ${pillClass}">${riskText}</span>
+        <p class="risk-line">
+        Riesgo calculado: <span class="risk-pill ${pillClass}">${riskText}</span>
         </p>
-        <p><strong>${recommendation}</strong></p>
-        <p>${noteText}</p>
-        <p style="color:var(--muted); margin-top:8px;"><strong>Hallazgos seleccionados:</strong> ${findingsText}.</p>
+    
+        <div class="recommendation-text">${recommendation}</div>
+
+        <div class="mandatory-note" style="margin-top:12px;">${noteText}</div>
+
+        <p style="color:var(--muted); margin-top:12px;"><strong>Hallazgos seleccionados:</strong> ${findingsText}.</p>
     `;
 
     // Scroll into view smoothly after render
@@ -1018,6 +1312,14 @@ function toggleZoom(event) {
     aboutModal.addEventListener("click", (e) => {
         if (e.target === aboutModal) handleClose();
     });
+    
+    if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/GastroCalcApp/www/sw.js')
+        .then(reg => console.log('SW activo para este módulo'))
+        .catch(err => console.error('Error al verificar SW', err));
+    });
+  }
 
 </script>
 
