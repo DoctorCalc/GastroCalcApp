@@ -783,7 +783,7 @@
                     Esta herramienta es una guía basada en los algoritmos de la ESGE 2025. 
                     No sustituye el juicio clínico profesional.
                     <span class="footer-version">
-                        Versión 1.0.3. © Paco Casado. Granada 2025.
+                        Versión 1.0.4. © Paco Casado. Granada 2025.
                     </span>
                 </em>
             </div>
@@ -1327,7 +1327,12 @@ function toggleZoom(event) {
         .catch(err => console.error('Error al verificar SW', err));
     });
   }
-
+  // Bloqueo específico para Android/Chrome PWA
+  document.addEventListener('touchstart', function (event) {
+    if (event.touches.length > 1) {
+      event.preventDefault(); // Bloquea el gesto de pinza
+    }
+  }, { passive: false });
 </script>
 
 </body>

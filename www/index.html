@@ -233,6 +233,12 @@ if ('serviceWorker' in navigator) {
         .catch(err => console.error('Error en ruta SW:', err));
     });
   }
+  // Bloqueo específico para Android/Chrome PWA
+  document.addEventListener('touchstart', function (event) {
+    if (event.touches.length > 1) {
+      event.preventDefault(); // Bloquea el gesto de pinza
+    }
+  }, { passive: false });
 </script>
 </body>
 </html>
