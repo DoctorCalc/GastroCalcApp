@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Define el riesgo de cáncer gástrico y los intervalos de vigilancia según las guías ESGE 2025.">
-    <meta name="theme-color" content="#1f7832">
+    <meta name="theme-color" content="#8f1e27">
     <title>GastroCalc - Aplicación</title>
 
     <link rel="manifest" href="/GastroCalcApp/www/manifest.json">
@@ -45,6 +45,11 @@
             font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
             text-align: center;
             color: #222;
+            -webkit-user-select: none; /* Safari y Chrome en iOS/Android */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* IE/Edge */
+            user-select: none;         /* Estándar */
+            -webkit-touch-callout: none;
         }
 
         main.container {
@@ -64,6 +69,13 @@
             max-width: 250px;
             height: auto;
             margin-top: 30px;
+        }
+        .no-interact {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            pointer-events: none; /* Esto evita el menú, pero también el clic */
         }
 
         /* ======== Texto descriptivo ======== */
@@ -90,19 +102,27 @@
             display: block;
             width: 80%;
             max-width: 280px;
-            padding: 12px;
+            padding: 14px;
             background-color: #8f1e27; /* Un rojo similar al del logo */
             color: #fff;
-            text-decoration: none;  /* Quita el subrayado si usas <a> */
-            border: none;
-            border-radius: 10px;
+            text-decoration: none;
+            cursor: pointer;
+            border-radius: 12px;
+            font-family: inherit; /* Para que no cambie la letra Poppins */
             font-size: 1.05em;
             font-weight: 600;
-            transition: background-color 0.3s ease, transform 0.15s ease;
+            transition: all 0.1s ease;
+            border: none;         /* Elimina el relieve y el borde gris */
+            border-bottom: 4px solid #4a0202;
+            text-align: center;   /* Centra el texto (el <button> no lo hace igual que el <a>) */
+            appearance: none;     /* Elimina estilos predeterminados de iOS/Android */
+            outline: none;        /* Evita el recuadro al hacer clic */
         }
 
-        .calculator-button:hover {
-            background-color: #40060b;    /* Rojo más oscuro al pasar el ratón */
+        .calculator-button:active {
+            transform: translateY(2px); 
+            border-bottom-width: 2px;
+            background-color: #40060b;
         }
         /* Que el modal esté oculto por defecto para evitar el parpadeo */
         #legalModal {
@@ -132,16 +152,18 @@
 </head>
 <body>
     <main class="container">
-        <img src="gastrocalc.jpg" alt="Logotipo de GastroCalc" class="logo-image">
+        <img src="gastrocalc.jpg" alt="Logotipo de GastroCalc" class="logo-image no-interact">
 
         <p class="description-text">
             <strong>Aplicación para calcular el seguimiento de pacientes con riesgo de cáncer gástrico.</strong><br>
             Basada en la guía de la <em>ESGE de 2025</em>.
         </p>
 
-        <div class="buttons-container">
-            <a href="Calculagas.html" class="calculator-button" role="button">Iniciar Calculadora</a>
-        </div>
+       <div class="buttons-container">
+            <button onclick="window.location.href='Calculagas.html'" class="calculator-button">
+            Iniciar Calculadora
+            </button>
+       </div>
     </main>
     
 <div id="legalModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
