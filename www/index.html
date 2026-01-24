@@ -148,6 +148,66 @@
                 font-size: 1em; /* Ligeramente más pequeños en PC */
             }
         }
+ /* Clase común para ambos banners (iOS y el contenedor de Android) */
+.install-banner-style {
+    display: none; /* Se activa por JS */
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%); /* Centrado perfecto en pantalla */
+    width: 90%;
+    max-width: 400px;
+    background-color: #8f1e27;
+    color: white;
+    padding: 25px 15px 15px 15px;
+    border-radius: 15px;
+    z-index: 10001;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    text-align: center;
+    box-sizing: border-box;
+}
+
+/* Aplicamos la clase a ambos IDs */
+#ios-install-banner, #android-install-container {
+    /* Heredan todo lo de arriba */
+}
+
+/* El botón blanco específico de Android */
+#android-install-button {
+    display: block;
+    width: 100%;
+    background-color: white;
+    color: #8f1e27;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+#ios-install-banner strong {
+    color: #4ade80;
+}
+
+/* La X de cierre */
+.close-banner {
+    position: absolute;
+    top: 5px;
+    right: 12px;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    line-height: 1;
+    opacity: 0.8;
+}
+
+.close-banner:hover {
+    opacity: 1;
+}
     </style>
 </head>
 <body>
@@ -186,6 +246,18 @@
         </button>
     </div>
 </div>
+<div id="ios-install-banner" class="install-banner-style">
+        <span class="close-banner" onclick="this.parentElement.style.display='none'">&times;</span>
+        <div style="margin-bottom: 5px;"><strong>¿Instalar ColonCalc?</strong></div>
+        Pulsa el icono de compartir <img src="Ios-Share.png" style="width:18px; vertical-align: middle; filter: brightness(0) invert(1); opacity: 0.9;"> y selecciona <strong>"Añadir a la pantalla de inicio"</strong>.
+    </div>
+
+    <div id="android-install-container" class="install-banner-style">
+        <span class="close-banner" onclick="this.parentElement.style.display='none'">&times;</span>
+        <div style="margin-bottom: 5px;"><strong>¿Usar como App?</strong></div>
+        <div style="font-size: 14px;">Para acceso rápido y sin conexión.</div>
+        <button id="android-install-button">✚ Instalar Ahora</button>
+    </div>
 
 <script>
         // Lógica del Modal
@@ -239,6 +311,94 @@ if ('serviceWorker' in navigator) {
       event.preventDefault(); // Bloquea el gesto de pinza
     }
   }, { passive: false });
+  
+  const isIos = () => {
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        return /iphone|ipad|ipod/.test(userAgent);
+    };
+
+    const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
+    // --- LÓGICA IPHONE ---
+    if (isIos() && !isInStandaloneMode()) {
+        const iosBanner = document.getElementById('ios-install-banner');
+        iosBanner.style.display = 'block';
+        // Se oculta solo tras 12 segundos para dar tiempo a leer
+        setTimeout(() => { iosBanner.style.display = 'none'; }, 12000);
+    }
+
+    // --- LÓGICA ANDROID COMPLETA ---
+let deferredPrompt;
+const androidContainer = document.getElementById('android-install-container');
+const androidBtn = document.getElementById('android-install-button');
+
+// 1. CAPTURA DEL EVENTO (Chrome nativo)
+window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('Evento beforeinstallprompt capturado');
+    e.preventDefault(); 
+    deferredPrompt = e;  
+    
+    if (androidContainer) {
+        androidContainer.style.display = 'block';
+    }
+});
+
+// 1b. PLAN B: Si en 4 segundos no ha saltado el evento (Navegador de Google/Cámara)
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        const isAndroid = /android/.test(navigator.userAgent.toLowerCase());
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+        
+        // Detectamos específicamente el visor de Google (GSA)
+        const isGoogleApp = /gsa/i.test(navigator.userAgent.toLowerCase());
+
+        // Solo actuamos si es Android, no está instalada y NO ha saltado el evento de Chrome
+        if (isAndroid && !isStandalone && !deferredPrompt) {
+            
+            // Si el banner ya está visible (porque Chrome sí lanzó el evento), no hacemos nada
+            if (androidContainer && androidContainer.style.display !== 'block') {
+                
+                console.log("Modo ayuda: Navegador de Google detectado.");
+                
+                androidContainer.innerHTML = `
+                    <span class="close-banner" onclick="this.parentElement.style.display='none'">&times;</span>
+                    <div style="font-size: 14px; margin-bottom: 8px; line-height: 1.4;">
+                        <strong style="color: #fca5a5;">Instalación:</strong><br>
+                        Pulsa la <strong>flecha (↓)</strong> arriba <br> o los <strong>tres puntos (⋮)</strong> y "Instalar".
+                    </div>
+                    <button id="android-manual-btn" style="width: 100%; background: white; color: #8f1e27; border: none; padding: 10px; border-radius: 8px; font-weight: bold;">ENTENDIDO</button>
+                `;
+                androidContainer.style.setProperty('display', 'block', 'important');
+
+                document.getElementById('android-manual-btn').onclick = () => {
+                    androidContainer.style.display = 'none';
+                };
+            }
+        }
+    }, 6000); // Subimos a 6 segundos para dar tiempo de sobra a Chrome
+});
+
+// 2. EJECUCIÓN DE LA INSTALACIÓN (Solo si deferredPrompt existe)
+if (androidBtn) {
+    androidBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            androidContainer.style.display = 'none';
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`Usuario eligió: ${outcome}`);
+            deferredPrompt = null;
+        }
+    });
+}
+
+// 3. DETECTAR SI SE INSTALÓ
+window.addEventListener('appinstalled', () => {
+    console.log('App instalada con éxito');
+    if (androidContainer) {
+        androidContainer.style.display = 'none';
+    }
+    deferredPrompt = null;
+});
 </script>
 </body>
 </html>
