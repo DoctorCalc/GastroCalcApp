@@ -554,6 +554,24 @@
             cursor: zoom-out;
             margin: 100px auto !important; /* El margen auto arriba/abajo ayuda al scroll */
         }
+       
+        #zoom-notice {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7); /* Fondo oscuro semitransparente */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            z-index: 9999;
+            pointer-events: none; /* Para que no bloquee los clics en la imagen */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: opacity 1s ease;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
 
         .close-btn {
             position: fixed;
@@ -785,7 +803,7 @@
                     Esta herramienta es una guía basada en los algoritmos de la ESGE 2025. 
                     No sustituye el juicio clínico profesional.
                     <span class="footer-version">
-                        Versión 1.0.8. © Paco Casado. Granada 2025.
+                        Versión 1.0.9. © Paco Casado. Granada 2025.
                     </span>
                 </em>
             </div>
@@ -854,7 +872,7 @@
                     <em>"Management of epithelial precancerous conditions and early neoplasia of the stomach (MAPS III): European Society of Gastrointestinal Endoscopy (ESGE), European Helicobacter and Microbiota Study Group (EHMSG) and European Society of Pathology (ESP) Guideline update 2025"</em>
                     de la ESGE, publicada en la revista Endoscopy en 2025. No sustituye el juicio clínico profesional. 
                     <span class="footer-version">
-                        Versión 1.0.8. © Paco Casado. Granada 2025.
+                        Versión 1.0.9. © Paco Casado. Granada 2025.
                     </span> 
                 </div>
             </div>
@@ -1258,10 +1276,29 @@ function openImageViewer(src) {
     img.classList.remove('zoomed'); // Empieza sin zoom
     modal.style.display = "block";
     document.body.style.overflow = "hidden"; // Bloquea el scroll de la app
+    // --- AÑADIR AVISO DE ZOOM ---
+    // Creamos el elemento
+    const notice = document.createElement('div');
+    notice.id = 'zoom-notice';
+    notice.innerText = 'Pulsa sobre la imagen para ampliar';
+    
+    // Lo añadimos al modal (asegúrate de que el modal sea el padre)
+    modal.appendChild(notice);
+
+    // Animación de salida: a los 3 segundos empieza a desvanecerse
+    setTimeout(() => {
+        notice.style.opacity = '0';
+        // A los 4 segundos lo eliminamos del mapa por completo
+        setTimeout(() => notice.remove(), 1000);
+    }, 3000);
 }
 
 function closeImageViewer(event) {
-    // Cierra si pulsas la X o fuera de la imagen
+    // 1. Buscamos si existe el aviso de zoom y lo borramos inmediatamente al cerrar
+    const existingNotice = document.getElementById('zoom-notice');
+    if (existingNotice) existingNotice.remove();
+
+    // 2. Lógica de cierre que ya tenías
     if (event.target.id === 'imageModal' || 
         event.target.className === 'close-btn' || 
         event.target.className === 'modal-content-wrapper') {
@@ -1273,15 +1310,18 @@ function closeImageViewer(event) {
 
 function toggleZoom(event) {
     event.stopPropagation();
-    const img = event.target;    img.classList.toggle('zoomed');
+    const img = event.target;
+    img.classList.toggle('zoomed');
     
-    // Si quitamos el zoom, volvemos arriba para que no se vea cortada la próxima vez
+    // EXTRA: Si el usuario hace zoom, borramos el aviso ya mismo (porque ya aprendió a usarlo)
+    const existingNotice = document.getElementById('zoom-notice');
+    if (existingNotice) existingNotice.remove();
+    
     if (!img.classList.contains('zoomed')) {
         document.getElementById('imageModal').scrollTop = 0;
         document.getElementById('imageModal').scrollLeft = 0;
     }
 }
-
 
     // ========== MODAL ACERCA DE ==========
     const aboutBtn = document.getElementById("about-btn");
